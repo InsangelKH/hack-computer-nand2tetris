@@ -56,16 +56,13 @@ Initially, I began this project using **TypeScript** for Chapters 5-7, implement
 ## How to Use
 
 1. Clone the repository:
+
     ```sh
     git clone https://github.com/your-repo/nand2tetris-project.git
     cd hack-computer-nand2tetris
     ```
 
----
-
 2. For HDL projects (Chapters 1-4), use the **Hardware Simulator** provided in the Nand2Tetris course.
-
----
 
 3. For the assembler, VM, and compiler (Chapters 5-7), ensure you have Go installed and run:
 
@@ -74,8 +71,6 @@ Initially, I began this project using **TypeScript** for Chapters 5-7, implement
     ```sh
     go run *.go
     ```
-
----
 
 4. For OS functions (Chapter 8), use the **Jack Compiler** from the Nand2Tetris toolset.
 
