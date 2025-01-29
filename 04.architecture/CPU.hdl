@@ -1,0 +1,58 @@
+CHIP CPU {
+    IN  inM[16],         
+        instruction[16], 
+        reset;           
+                         
+    OUT outM[16],        
+        writeM,          
+        addressM[15],    
+        pc[15];          
+
+    PARTS:
+    // A - instruction
+    Not(in=instruction[15], out=NotAInstruction);
+	Mux16(a=ALUOut, b=instruction, sel=NotAInstruction, out=MuxAInstruction);
+    Or(a=NotAInstruction, b=instruction[5], out=OrInstruction);
+    ARegister(in=MuxAInstruction, load=OrInstruction, out=ARegOut, out[0..14]=addressM);
+
+    // C - instruction
+    And(a=instruction[15], b=instruction[12], out=MemoryDetector);
+    Mux16(a=ARegOut, b=inM, sel=MemoryDetector, out=MuxMemory);
+    And(a=instruction[15], b=instruction[4], out=D_Detector);
+    DRegister(in=ALUOut, load=D_Detector, out=DRegOut);
+
+    ALU(
+        x=DRegOut, y=MuxMemory, 
+
+        zx=instruction[11], 
+        nx=instruction[10], 
+        zy=instruction[9], 
+        ny=instruction[8], 
+        f=instruction[7], 
+        no=instruction[6], 
+
+        zr=ALUZR, ng=ALUNG,
+        
+        out=ALUOut, out=outM
+    );
+
+    And(a=instruction[15], b=instruction[3], out=writeM);
+
+    // PC
+    Not(in=ALUZR, out=notZero);
+    Not(in=ALUNG, out=positive);
+    And(a=instruction[15], b=instruction[0], out=JGTDetector);
+    And(a=positive, b=notZero, out=isMoreZero);
+    And(a=JGTDetector, b=isMoreZero, out=JGT);
+    
+    And(a=instruction[15], b=instruction[1], out=JEGDetector);
+    And(a=JEGDetector, b=ALUZR, out=JEQ);
+
+    And(a=instruction[15], b=instruction[2], out=JLTDetector);
+    And(a=JLTDetector, b=ALUNG, out=JLT);
+
+    Or(a=JGT, b=JEQ, out=JGTJEQ);
+    Or(a=JGTJEQ, b=JLT, out=JGTJEQLT);
+
+    PC(in=ARegOut, load=JGTJEQLT, inc=true, reset=reset, out[0..14]=pc);
+}
